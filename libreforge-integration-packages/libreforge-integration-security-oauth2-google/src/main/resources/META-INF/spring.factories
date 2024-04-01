@@ -1,0 +1,2 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+  com.libreforge.integration.security.oauth2.google.config.SecurityOAuth2GoogleConfig
