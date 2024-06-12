@@ -74,6 +74,11 @@
             <artifactId>libreforge-integration-security-oauth2-google</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.libreforge.integration</groupId>
+            <artifactId>libreforge-integration-images</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
