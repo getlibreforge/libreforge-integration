@@ -18,7 +18,7 @@
         <module>libreforge-integration-dictionaries</module>
         <module>libreforge-integration-payment-stripe</module>
         <module>libreforge-integration-security-oauth2-google</module>
-        <module>libreforge-integration-images</module>
+        <module>libreforge-integration-designer-image-server</module>
     </modules>
 
 </project>
