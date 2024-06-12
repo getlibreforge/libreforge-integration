@@ -36,6 +36,7 @@ public class ImagesController {
 
     /**
      * Uploads multiple images along with their associated tags to AWS S3.
+     * Please check CURL request in README.md
      *
      * @param images List of images to be uploaded.
      * @param tagMap Map of image filenames to their associated tags.
@@ -70,6 +71,7 @@ public class ImagesController {
 
     /**
      * Retrieves images from AWS S3 that match the provided tag parameters.
+     * Please check CURL request in README.md
      *
      * @param tagParams The tag parameters to filter images by.
      * @return A list of ImageResponse objects containing the images and their associated tags.
@@ -92,6 +94,7 @@ public class ImagesController {
 
     /**
      * Deletes an image from AWS S3 by its ID.
+     * Please check CURL request in README.md
      *
      * @param id The ID of the image to be deleted.
      * @return A response indicating the result of the delete operation.
