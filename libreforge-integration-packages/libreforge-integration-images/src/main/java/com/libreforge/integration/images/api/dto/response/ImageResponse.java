@@ -5,12 +5,12 @@ import java.util.List;
 public class ImageResponse {
     private String id;
     private String url;
-    private List<TagResponse> tagDTOs;
+    private List<TagResponse> tags;
 
-    public ImageResponse(String id, String url, List<TagResponse> tagDTOs) {
+    public ImageResponse(String id, String url, List<TagResponse> tags) {
         this.id = id;
         this.url = url;
-        this.tagDTOs = tagDTOs;
+        this.tags = tags;
     }
 
     public String getId() {
@@ -29,11 +29,11 @@ public class ImageResponse {
         this.url = url;
     }
 
-    public List<TagResponse> getTagDTOs() {
-        return tagDTOs;
+    public List<TagResponse> getTags() {
+        return tags;
     }
 
-    public void setTagDTOs(List<TagResponse> tagDTOs) {
-        this.tagDTOs = tagDTOs;
+    public void setTags(List<TagResponse> tags) {
+        this.tags = tags;
     }
 }
