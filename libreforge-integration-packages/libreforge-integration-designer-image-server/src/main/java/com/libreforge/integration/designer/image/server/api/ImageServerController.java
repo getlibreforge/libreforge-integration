@@ -57,8 +57,7 @@ public class ImageServerController {
     /**
      * Retrieves images from AWS S3 that match the provided tag parameters
      */
-    @PostMapping("/search")
-    @GetMapping(produces = "application/json")
+    @PostMapping(value = "/search", produces = "application/json")
     public List<ImageResponse> getImages(@RequestBody GetImagesRequest body) {
 
         LOG.info("GET /images called with Tag params: {}", body.getTags());

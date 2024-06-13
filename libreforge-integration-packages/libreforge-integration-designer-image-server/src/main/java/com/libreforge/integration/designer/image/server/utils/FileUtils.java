@@ -15,6 +15,8 @@ public final class FileUtils {
     public static final String JPEG_CONTENT_TYPE = "image/jpeg";
     public static final String PNG_CONTENT_TYPE = "image/png";
     public static final String SVG_CONTENT_TYPE = "image/svg+xml";
+    public static final String DOT = ".";
+    public static final String EMPTY_STRING = "";
 
     public static final List<String> ALLOWED_CONTENT_TYPES = List.of(
             JPEG_CONTENT_TYPE, PNG_CONTENT_TYPE, SVG_CONTENT_TYPE);
@@ -44,5 +46,23 @@ public final class FileUtils {
         }
 
         return contentType;
+    }
+
+    public static String getFileExtension(String originalFilename) {
+        String fileExtension = EMPTY_STRING;
+        int extensionIndex = originalFilename.lastIndexOf(DOT);
+        if (extensionIndex > 0) {
+            fileExtension = originalFilename.substring(extensionIndex);
+        }
+        return fileExtension;
+    }
+
+    public static String stripeFileExtension(String fileNameWithExtension) {
+        String fileName = fileNameWithExtension;
+        int extensionIndex = fileNameWithExtension.lastIndexOf(DOT);
+        if (extensionIndex > 0) {
+            fileName = fileNameWithExtension.substring(0, extensionIndex);
+        }
+        return fileName;
     }
 }

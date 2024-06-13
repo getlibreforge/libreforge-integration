@@ -19,6 +19,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -40,20 +41,14 @@ public class AwsS3ServiceImpl implements ImageService {
     @Override
     public FileDTO uploadFile(MultipartFile file, List<String> tags) throws IOException {
         String id = UUID.randomUUID().toString();
-
+        String fileName = id + getFileExtension(Objects.requireNonNull(file.getOriginalFilename()));
         Path tempFile = Files.createTempFile(null, null);
         Files.copy(file.getInputStream(), tempFile, StandardCopyOption.REPLACE_EXISTING);
 
-        PutObjectRequest.Builder builder = PutObjectRequest.builder()
-                .bucket(bucketName)
-                .key(id)
-                .contentType(getContentType(file));
+        PutObjectRequest.Builder builder = PutObjectRequest.builder().bucket(bucketName).key(fileName).contentType(getContentType(file));
 
         if (tags != null && !tags.isEmpty()) {
-            List<Tag> s3Tags = tags.stream()
-                    .map(value -> Tag.builder()
-                    .key(value).value(value).build())
-                    .collect(Collectors.toList());
+            List<Tag> s3Tags = tags.stream().map(value -> Tag.builder().key(value).value(value).build()).collect(Collectors.toList());
 
             builder.tagging(Tagging.builder().tagSet(s3Tags).build());
         }
@@ -63,7 +58,7 @@ public class AwsS3ServiceImpl implements ImageService {
         Files.delete(tempFile);
 
         LOG.info("Image uploaded successfully. Id: {}", id);
-        return new FileDTO(id, buildUrl(publicUrlTemplate, bucketName, id));
+        return new FileDTO(id, buildUrl(publicUrlTemplate, bucketName, fileName));
     }
 
     @Override
@@ -75,12 +70,13 @@ public class AwsS3ServiceImpl implements ImageService {
         );
         List<S3Object> contents = listObjectsV2Response.contents();
 
-        for (S3Object obj: contents) {
-            String fileName = obj.key();
-            String fileUrl = buildUrl(publicUrlTemplate, bucketName, fileName);
-            List<String> tags = getFileTags(fileName);  // Fetch tags for each file
+        for (S3Object obj : contents) {
+            String originalFileName = obj.key();
+            String id = stripeFileExtension(originalFileName);
+            String fileUrl = buildUrl(publicUrlTemplate, bucketName, originalFileName);
+            List<String> tags = getFileTags(originalFileName);  // Fetch tags for each file
 
-            response.add(new FileDTO(fileName, fileUrl, tags));
+            response.add(new FileDTO(id, fileUrl, tags));
         }
 
         return response;
@@ -88,12 +84,26 @@ public class AwsS3ServiceImpl implements ImageService {
 
     @Override
     public void deleteImage(String id) throws ApplicationException {
-        DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder().bucket(bucketName).key(id).build();
-
         try {
+            ListObjectsV2Response listObjectsV2Response = s3Client.listObjectsV2(
+                ListObjectsV2Request.builder().bucket(bucketName).build()
+            );
+            List<S3Object> contents = listObjectsV2Response.contents();
+
+            S3Object targetObject = contents.stream()
+                    .filter(obj -> obj.key().contains(id))
+                    .findFirst()
+                    .orElseThrow(() -> new ObjectNotFoundException("File with id " + id + " not found."));
+
+            DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(targetObject.key())
+                    .build();
             s3Client.deleteObject(deleteObjectRequest);
+
+            LOG.info("File with id {} deleted successfully.", id);
         } catch (Exception ex) {
-            throw new ObjectNotFoundException(ex.getMessage());
+            throw new ObjectNotFoundException("Error deleting file with id: " + id + " . Message: " + ex.getMessage());
         }
     }
 
@@ -107,7 +117,7 @@ public class AwsS3ServiceImpl implements ImageService {
         GetObjectTaggingResponse getTaggingResponse = s3Client.getObjectTagging(getTaggingRequest);
         List<Tag> s3Tags = getTaggingResponse.tagSet();
 
-        for (Tag s3Tag: s3Tags) {
+        for (Tag s3Tag : s3Tags) {
             tags.add(s3Tag.value());
         }
 
