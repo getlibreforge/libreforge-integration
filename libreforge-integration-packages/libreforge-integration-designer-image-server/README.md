@@ -29,30 +29,23 @@ the contract for storing operations.
 
 **Upload image**
 ```
-curl -X POST "http://localhost:8080/api/images" \
--H "accept: application/json" \
+curl -X POST "http://localhost:8080/api/designer/image-server/images" \
 -H "Content-Type: multipart/form-data" \
--F "images=@img1.png" \
--F "img1.png=key3:value3;key1:value1"
+-F "image=@img.png" \
+-F "tags=Tag_1" \
+-F "tags=Tag_2"
 ```
-**Get images**
 
-_No params_
+**Get images**
 ```
-curl -X GET "http://localhost:8080/api/images" \
--H "accept: application/json" \
--H "Content-Type: application/json"
-```
-_With params_
-```
-curl -X GET "http://localhost:8080/api/images?key1=value1" \
--H "accept: application/json" \
--H "Content-Type: application/json"
+curl -X POST "http://localhost:8080/api/designer/image-server/images/search" \
+-H "Content-Type: application/json" \
+-d '{"tags": ["Tag_1"]}'
 ```
 
 **Delete image**
 ```
-curl -X DELETE "http://localhost:8080/api/images/ec72c92d-25c6-42d7-b4c4-8ce7a0069f61" \
+curl -X DELETE "http://localhost:8080/api/designer/image-server/images/ec72c92d-25c6-42d7-b4c4-8ce7a0069f61" \
 -H "accept: application/json" \
 -H "Content-Type: application/json"
 ```

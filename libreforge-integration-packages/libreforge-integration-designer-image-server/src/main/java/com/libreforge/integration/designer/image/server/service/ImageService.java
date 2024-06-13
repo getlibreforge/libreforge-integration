@@ -30,7 +30,6 @@ public interface ImageService {
      * Deletes an image from data store.
      *
      * @param id The ID of the image to be deleted.
-     * @return True if the image is deleted successfully, false otherwise.
      */
     void deleteImage(String id) throws ApplicationException ;
 }
