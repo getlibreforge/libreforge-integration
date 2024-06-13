@@ -19,7 +19,6 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -40,12 +39,15 @@ public class AwsS3ServiceImpl implements ImageService {
 
     @Override
     public FileDTO uploadFile(MultipartFile file, List<String> tags) throws IOException {
-        String id = UUID.randomUUID().toString();
-        String fileName = id + getFileExtension(Objects.requireNonNull(file.getOriginalFilename()));
+        String fileKey = generateFileKey(UUID.randomUUID().toString(),
+                getFileExtension(file.getOriginalFilename()));
+
         Path tempFile = Files.createTempFile(null, null);
         Files.copy(file.getInputStream(), tempFile, StandardCopyOption.REPLACE_EXISTING);
 
-        PutObjectRequest.Builder builder = PutObjectRequest.builder().bucket(bucketName).key(fileName).contentType(getContentType(file));
+        PutObjectRequest.Builder builder = PutObjectRequest.builder()
+                .bucket(bucketName).key(fileKey)
+                .contentType(getContentType(file));
 
         if (tags != null && !tags.isEmpty()) {
             List<Tag> s3Tags = tags.stream().map(value -> Tag.builder().key(value).value(value).build()).collect(Collectors.toList());
@@ -57,8 +59,8 @@ public class AwsS3ServiceImpl implements ImageService {
         s3Client.putObject(putRequest, tempFile);
         Files.delete(tempFile);
 
-        LOG.info("Image uploaded successfully. Id: {}", id);
-        return new FileDTO(id, buildUrl(publicUrlTemplate, bucketName, fileName));
+        LOG.info("Image uploaded successfully. Key: {}", fileKey);
+        return new FileDTO(fileKey, buildUrl(publicUrlTemplate, bucketName, fileKey));
     }
 
     @Override
@@ -71,39 +73,25 @@ public class AwsS3ServiceImpl implements ImageService {
         List<S3Object> contents = listObjectsV2Response.contents();
 
         for (S3Object obj : contents) {
-            String originalFileName = obj.key();
-            String id = stripeFileExtension(originalFileName);
-            String fileUrl = buildUrl(publicUrlTemplate, bucketName, originalFileName);
-            List<String> tags = getFileTags(originalFileName);  // Fetch tags for each file
+            String fileKey = obj.key();
+            String fileUrl = buildUrl(publicUrlTemplate, bucketName, fileKey);
+            List<String> tags = getFileTags(fileKey);  // Fetch tags for each file
 
-            response.add(new FileDTO(id, fileUrl, tags));
+            response.add(new FileDTO(fileKey, fileUrl, tags));
         }
 
         return response;
     }
 
     @Override
-    public void deleteImage(String id) throws ApplicationException {
+    public void deleteImage(String fileKey) throws ApplicationException {
+        DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
+                .bucket(bucketName).key(fileKey).build();
+
         try {
-            ListObjectsV2Response listObjectsV2Response = s3Client.listObjectsV2(
-                ListObjectsV2Request.builder().bucket(bucketName).build()
-            );
-            List<S3Object> contents = listObjectsV2Response.contents();
-
-            S3Object targetObject = contents.stream()
-                    .filter(obj -> obj.key().contains(id))
-                    .findFirst()
-                    .orElseThrow(() -> new ObjectNotFoundException("File with id " + id + " not found."));
-
-            DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
-                    .bucket(bucketName)
-                    .key(targetObject.key())
-                    .build();
             s3Client.deleteObject(deleteObjectRequest);
-
-            LOG.info("File with id {} deleted successfully.", id);
         } catch (Exception ex) {
-            throw new ObjectNotFoundException("Error deleting file with id: " + id + " . Message: " + ex.getMessage());
+            throw new ObjectNotFoundException(ex.getMessage());
         }
     }
 

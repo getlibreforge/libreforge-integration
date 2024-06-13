@@ -1,6 +1,7 @@
 package com.libreforge.integration.designer.image.server.utils;
 
 import com.libreforge.integration.designer.image.server.api.dto.ImageResponse;
+import com.libreforge.integration.designer.image.server.common.FileExtension;
 import com.libreforge.integration.designer.image.server.service.dto.FileDTO;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -8,18 +9,12 @@ import java.util.List;
 
 public final class FileUtils {
 
-    public static final String PNG_EXT = ".png";
-    public static final String JPEG_EXT = ".jpeg";
-    public static final String JPG_EXT = ".jpg";
-    public static final String SVG_EXT = ".svg";
-    public static final String JPEG_CONTENT_TYPE = "image/jpeg";
-    public static final String PNG_CONTENT_TYPE = "image/png";
-    public static final String SVG_CONTENT_TYPE = "image/svg+xml";
-    public static final String DOT = ".";
-    public static final String EMPTY_STRING = "";
-
-    public static final List<String> ALLOWED_CONTENT_TYPES = List.of(
-            JPEG_CONTENT_TYPE, PNG_CONTENT_TYPE, SVG_CONTENT_TYPE);
+    public static final List<String> ALLOWED_CONTENT_TYPES =
+            List.of(
+                FileExtension.JPG.getContentType(),
+                FileExtension.PNG.getContentType(),
+                FileExtension.SVG.getContentType()
+            );
 
     private FileUtils() {
     }
@@ -33,36 +28,14 @@ public final class FileUtils {
     }
 
     public static String getContentType(MultipartFile file) {
-        String contentType = null;
-        String fileName = file.getOriginalFilename();
-        if (fileName != null) {
-            if (fileName.endsWith(PNG_EXT)) {
-                contentType = PNG_CONTENT_TYPE;
-            } else if (fileName.endsWith(JPG_EXT) || fileName.endsWith(JPEG_EXT)) {
-                contentType = JPEG_CONTENT_TYPE;
-            } else if (fileName.endsWith(SVG_EXT)) {
-                contentType = SVG_CONTENT_TYPE;
-            }
-        }
-
-        return contentType;
+        return FileExtension.parse(file.getOriginalFilename(), null);
     }
 
     public static String getFileExtension(String originalFilename) {
-        String fileExtension = EMPTY_STRING;
-        int extensionIndex = originalFilename.lastIndexOf(DOT);
-        if (extensionIndex > 0) {
-            fileExtension = originalFilename.substring(extensionIndex);
-        }
-        return fileExtension;
+        return FileExtension.parse(originalFilename, "");
     }
 
-    public static String stripeFileExtension(String fileNameWithExtension) {
-        String fileName = fileNameWithExtension;
-        int extensionIndex = fileNameWithExtension.lastIndexOf(DOT);
-        if (extensionIndex > 0) {
-            fileName = fileNameWithExtension.substring(0, extensionIndex);
-        }
-        return fileName;
+    public static String generateFileKey(String id, String extension) {
+        return String.format("%s.%s", id, extension);
     }
 }
