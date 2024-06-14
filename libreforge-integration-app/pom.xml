@@ -79,6 +79,23 @@
             <artifactId>libreforge-integration-designer-image-server</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+        <!-- User -->
+        <dependency>
+            <groupId>com.libreforge.integration</groupId>
+            <artifactId>libreforge-integration-data-user</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.libreforge.integration</groupId>
+            <artifactId>libreforge-integration-data-connection</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.libreforge.integration</groupId>
+            <artifactId>libreforge-integration-security</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
     <build>

@@ -15,6 +15,10 @@
 
     <modules>
         <module>libreforge-integration-common</module>
+        <module>libreforge-integration-data-connection</module>
+        <module>libreforge-integration-data-user</module>
+        <module>libreforge-integration-data-user-migration</module>
+        <module>libreforge-integration-security</module>
         <module>libreforge-integration-dictionaries</module>
         <module>libreforge-integration-payment-stripe</module>
         <module>libreforge-integration-security-oauth2-google</module>
